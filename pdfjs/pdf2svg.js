@@ -153,7 +153,7 @@ const handle2 = async (filePath, index) => {
 // test()
 
 
-// 读取第一页 PDF 内容并转成 svg,获取 svg 内容，生成文件
+// 读取第一页 PDF 内容并转成 svg
 const handle = async () => {
   const loadingTask = pdfjsLib.getDocument({
     data,
@@ -179,8 +179,26 @@ const handle = async () => {
     // svgGfx.embedFonts = true;
     // 文件内容
     const svg = await svgGfx.getSVG(opList, viewport);
+    // 生成文件
     fs.writeFileSync(path.resolve(__dirname, '../output', '1.svg'),svg.toString(), 'utf8');
+    
+    // // 获取 canvas （一下代码在 node 环境无法执行，需要在浏览器环境下）
+    // const canvas = document.createElement('canvas')
+    // const context = canvas.getContext('2d')
+    // const img = new Image()
+    // // svg内容中可以有中文字符
+    // img.src = `data:image/svg+xml,${decodeURI(encodeURIComponent(svg))}`
+    // img.onload = () => {
+    //   console.log(`img 加载完成`, img)
+    //   canvas.width = img.width
+    //   canvas.height = img.height
 
+    //   context?.drawImage(img, 0, 0)
+    //   // 获取到 dataURL 再得到 base64
+    //   const base64 = canvas.toDataURL('image/png').replace('data:image/png;base64,', '')
+    //   console.log('base64: ', base64)
+    // }
+    
     // Release page resources.
     page.cleanup();
   } catch (err) {
