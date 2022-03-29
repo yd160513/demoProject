@@ -2,9 +2,11 @@
   "name": "demoproject",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
   },
   "repository": {
     "type": "git",
@@ -21,9 +23,14 @@
     "axios": "^0.26.1",
     "crypto": "^1.0.1",
     "pdfjs-dist": "^2.13.216",
-    "sharp": "^0.30.3"
+    "sharp": "^0.30.3",
+    "@vitejs/plugin-vue": "^2.2.0",
+    "typescript": "^4.5.4",
+    "vite": "^2.8.0",
+    "vue-tsc": "^0.29.8"
   },
   "dependencies": {
-    "canvas": "^2.9.0"
+    "canvas": "^2.9.0",
+    "vue": "^3.2.25"
   }
 }
