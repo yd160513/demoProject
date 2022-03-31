@@ -1,5 +1,5 @@
 <template>
-  <h1>虚拟滚动（虚拟列表）</h1>
+  <h1>虚拟滚动（虚拟列表）参考: https://juejin.cn/post/6844903982742110216</h1>
   <div ref="content" class="content">
     <div class="fir">
       <h1 class="fir-tit" @click="handle">一次性加载全部数据</h1>
@@ -16,7 +16,7 @@
           <div
             ref="items"
             class="item"
-            v-for="(item, index) in visibleData"
+            v-for="item in visibleData"
             :key="item.id"
             :style="{ height: itemHeight + 'px', lineHeight: itemHeight + 'px' }"
           >{{start}} - {{ item.value }} - {{ visibleLineCount }}</div>
@@ -178,7 +178,6 @@ export default defineComponent({
   overflow: auto;
   position: relative;
   height: 100%;
-  -webkit-overflow-scrolling: touch;
 }
 .list {
   height: 100%;
