@@ -24,6 +24,7 @@
       </div>
     </div>
   </div>
+  <div class="bot">这里是底线</div>
 </template>
 <script lang="ts">
 import { onMounted, ref, computed, defineComponent, Ref } from 'vue'

@@ -30,7 +30,7 @@ const upload = async (uploadPath) => {
   console.log('uploadRes', uploadRes)
   if (uploadRes && uploadRes.status === 200) {
     console.log(tempFilePath, fileName)
-    const copyFolder = path.resolve('./', 'ouput')
+    const copyFolder = path.resolve('./', 'output')
     if (!fs.existsSync(copyFolder)) {
       fs.mkdirSync(copyFolder);
     }

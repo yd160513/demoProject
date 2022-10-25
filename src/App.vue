@@ -5,8 +5,7 @@ import HelloWorld from './components/HelloWorld.vue'
 </script>
 
 <template>
-  <HelloWorld />
-  <div class="bot">这里是底线</div>
+    <router-view></router-view>
 </template>
 
 <style>
