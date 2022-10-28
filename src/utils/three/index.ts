@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import createGeometry from '../../utils/three/图形'
 
 /**
  * 创建几何的实例
@@ -6,11 +7,11 @@ import * as THREE from 'three'
  * @param color
  * @param x
  */
-export const makeInstance = (geometry: THREE.BoxGeometry, color: string, x: number) => {
+export const makeInstance = (geometry: THREE.BoxGeometry, color: number, x: number) => {
     /**
      * 给它一个材质: 相当于给几何定义的样式。
      * MeshBasicMaterial，这个材质不会受到灯光的影响
-     * MeshPhongMaterial 这个材质会受到灯光的影响
+     * MeshPhongMaterial 这个材质会受到灯光的影响，设置为这个材质对应的也要设置灯光，要不然就是黑的
      */
     const material = new THREE.MeshPhongMaterial({ color })
 
@@ -66,9 +67,9 @@ export const initFun = () => {
 
     // 创建实例，生成 mesh 和材质
     const cubes = [
-        makeInstance(geometry, '0x44aa88',  0),
-        makeInstance(geometry, '0x8844aa', -2),
-        makeInstance(geometry, '0xaa8844',  2)
+        makeInstance(geometry, 0x44aa88,  0),
+        makeInstance(geometry, 0x8844aa, -2),
+        makeInstance(geometry, 0xaa8844,  2)
     ]
 
     // 将实例添加到场景中
@@ -87,11 +88,11 @@ export const initFun = () => {
      * 增加光照效果
      * 1. 平行光: 平行光有一个位置和目标点。默认值都为(0, 0, 0)。我们这里 将灯光的位置设为(-1, 2, 4)，让它位于摄像机前面稍微左上方一点的地方。目标点还是(0, 0, 0)，让它朝向坐标原点方向。
      */
-    const color = 0xFFFFFF;
-    const intensity = 1;
-    const light = new THREE.DirectionalLight(color, intensity);
-    light.position.set(-1, 2, 4);
-    scene.add(light);
+    //const color = 0xFFFFFF;
+    //const intensity = 1;
+    //const light = new THREE.DirectionalLight(color, intensity);
+    //light.position.set(-1, 2, 4);
+    //scene.add(light);
 
     /**
      * 对上边的定义进行循环渲染
@@ -176,19 +177,22 @@ export const initFun2 = () => {
     const camera = new THREE.PerspectiveCamera( 75, 2, 0.1, 5 );
 
     // 创建一个立方体，我们需要一个BoxGeometry（立方体）对象. 这个对象包含了一个立方体中所有的顶点（vertices）和面（faces）。
-    const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    //const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    const geometry = createGeometry()
 
     // 创建实例，生成 mesh 和材质
-    const cubes = [
-        makeInstance(geometry, '0x44aa88',  0),
-        makeInstance(geometry, '0x8844aa', -2),
-        makeInstance(geometry, '0xaa8844',  2)
-    ]
+    const cube = makeInstance(geometry, 0x44aa88,  0)
+    //const cubes = [
+    //    makeInstance(geometry, '0x44aa88',  0),
+    //    makeInstance(geometry, '0x8844aa', -2),
+    //    makeInstance(geometry, '0xaa8844',  2)
+    //]
 
     // 将实例添加到场景中
-    cubes.forEach(cube => {
-        scene.add( cube );
-    })
+    scene.add( cube )
+    //cubes.forEach(cube => {
+    //    scene.add( cube );
+    //})
 
     /**
      * 默认情况下，当我们调用scene.add()的时候，物体将会被添加到(0,0,0)坐标。
@@ -217,10 +221,12 @@ export const initFun2 = () => {
          * 旋转角度是弧度制，一圈的弧度为2Π所以我们的立方体在每个方向旋转一周的时间为6.28秒。
          */
         // 将实例添加到场景中
-        cubes.forEach(cube => {
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
-        })
+        //cubes.forEach(cube => {
+        //    cube.rotation.x += 0.01;
+        //    cube.rotation.y += 0.01;
+        //})
+        cube.rotation.x += 0.01
+        cube.rotation.y += 0.01
 
         if (resizeRendererToDisplaySize(renderer)) {
             const canvas = renderer.domElement;
@@ -235,6 +241,56 @@ export const initFun2 = () => {
 
     animate();
 
+}
+
+export const initFun3 = () => {
+  // 创建场景
+  const scene = new THREE.Scene()
+  // 创建相机
+  const camera = new THREE.PerspectiveCamera(75, 2, 0.1, 5)
+  // 默认情况相机和被渲染的物体是坐标是重合的，所以将相机往远处放，也就是 Z 轴变大
+  camera.position.z = 2
+  // 获取页面 canvas 元素
+  const canvas = document.getElementById('box')
+  if (!canvas) return
+  // 创建渲染器
+  const renderer = new THREE.WebGLRenderer({ canvas })
+
+
+  // 创建立方体
+  //const geometry = new THREE.BoxGeometry(1, 1, 1)
+  const geometry = createGeometry()
+  // 创建材质
+  const material = new THREE.MeshPhongMaterial({ color: 0x44aa88 })
+  // 创建 mesh
+  const cube = new THREE.Mesh(geometry, material)
+  // 将 mesh 添加到场景中
+  scene.add(cube)
+
+  // 设置灯光
+  const color = 0xFFFFFF;
+  const intensity = 1;
+  const light = new THREE.DirectionalLight(color, intensity);
+  light.position.set(-1, 2, 4);
+  scene.add(light);
+
+
+  // 循环渲染
+  const render = () => {
+    cube.rotation.x += 0.01
+    cube.rotation.y += 0.01
+
+    if (resizeRendererToDisplaySize(renderer)) {
+      // 解决渲染内容根据浏览器变化被拉伸: 设置相机的宽高比设置为 canvas 的宽高比
+      const canvas = renderer.domElement;
+      camera.aspect = canvas.clientWidth / canvas.clientHeight;
+      camera.updateProjectionMatrix();
+    }
+
+    renderer.render(scene, camera)
+    requestAnimationFrame(render)
+  }
+  render()
 }
 
 export default {}

@@ -1,6 +1,7 @@
 <template>
 <!-- 第一种创建方式 -->
-  <div id="three"></div>
+<!--  <div id="three"></div>-->
+  <canvas id="box"></canvas>
 
 <!--
   第二种创建方式
@@ -9,7 +10,7 @@
   1. 在 HTML 中声明一个 div，在 js 中通过 const renderer = new THREE.WebGLRenderer(); 生成 canvas 然后 appendChild 到 div 下，
      设置渲染器尺寸: renderer.setSize( window.innerWidth, window.innerHeight );
 -->
-  <canvas id="c"></canvas>
+<!--  <canvas id="c"></canvas>-->
 
 
 <!--
@@ -37,14 +38,15 @@
 </template>
 <script lang="ts">
 import { onMounted, defineComponent } from 'vue'
-import { makeInstance, initFun, initFun2 } from '../utils/three'
+import { makeInstance, initFun, initFun2, initFun3 } from '../utils/three'
 
 export default defineComponent({
   name: '',
   setup(props) {
 
-    onMounted(initFun)
-    // onMounted(initFun2)
+     //onMounted(initFun)
+    //onMounted(initFun2)
+    onMounted(initFun3)
 
     return {
 
