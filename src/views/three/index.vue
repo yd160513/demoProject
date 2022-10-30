@@ -45,6 +45,37 @@ export default defineComponent({
       const material = new THREE.MeshBasicMaterial({ color: 0xffff00 })
       // 将立方体和材质融合到一起
       const cube = new THREE.Mesh(boxGeometry, material)
+
+      /**
+       * 几何体: 两个点形成一条线，三个点形成一个面，一个正方形的面由两个三角形组成。
+       * 几何体的基类是 BufferGeometry。
+       * boxGeometry 中有一个 attribute 属性，该属性的基类是 BufferGeometry，基类中包含了顶点位置(position)、法相量(normal)和 UV 坐标(uv)
+       * 顶点位置(position): 组成面的每条线的顶点，一个立方体有六个面，每个面有四个顶点，所以一共有24个顶点。
+       *                    每个顶点的值是由 x,y,z 三个值组成的，所以有 72 个值。这些值放在 array 字段中。
+       * uv: 举例: 一个正方体，将其展开平铺到一个平面上，这个平面就是 uv，uv 上的正方体每个顶点的坐标会对应到实际正方体上，这个坐标就称为 uv 坐标。
+       *     用途: 做一个包装纸或者贴图，然后包装到待渲染的几何体上
+       * 法相: 举例: 一束光照到几何体上，会有一个反射同时会有一定的角度，反射的角度是根据被照射面的朝向来决定的，法相就描述了被照射面的朝向
+       *
+       * 利用 BufferGeometry 创建几何体
+       */
+      // const geometry = new THREE.BufferGeometry()
+      // // 定义顶点位置: 三个三角形定义一个正方形
+      // const vertices = new Float32Array([
+      //   -1.0, -1.0, 1.0,
+      //   1.0, -1.0, 1.0,
+      //   1.0, 1.0, 1.0,
+      //   1.0, 1.0, 1.0,
+      //   -1.0, 1.0, 1.0,
+      //   -1.0, -1.0, 1.0
+      // ])
+      // // 设置顶点位置，标注每三个值是一个顶点
+      // geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3))
+      // // 定义材质
+      // const material = new THREE.MeshBasicMaterial({ color: 0xffff00 })
+      // // 材质和几何体结合生成最终的物体
+      // const cube = new THREE.Mesh(geometry, material)
+      // 添加到场景
+      scene.add(cube)
       console.log(boxGeometry);
       console.log(cube);
       // 设置物体位置: 需要移动的话可以放到循环渲染函数中
@@ -106,7 +137,7 @@ export default defineComponent({
       controls.enableDamping = true
 
       // 设置时钟
-      const clock = new THREE.Clock()
+      // const clock = new THREE.Clock()
 
       // 设置动画
       // const animate = gsap.to(cube.position, {
@@ -153,10 +184,10 @@ export default defineComponent({
       // 循环渲染: 浏览器每渲染一帧都调用渲染器重新渲染一次
       const render = () => {
         controls.update()
-        const runningTotalTime = clock.getElapsedTime()
-        const deltaTime = clock.getDelta()
-        console.log('运行时间总时长: ', runningTotalTime)
-        console.log('两次间隔时间: ', deltaTime)
+        // const runningTotalTime = clock.getElapsedTime()
+        // const deltaTime = clock.getDelta()
+        // console.log('运行时间总时长: ', runningTotalTime)
+        // console.log('两次间隔时间: ', deltaTime)
 
         // cube.position.x += 0.01
         // // 设置物体旋转
