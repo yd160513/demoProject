@@ -21,7 +21,10 @@ import * as dat from "dat.gui"
 
 export default defineComponent({
   setup() {
-    console.log(THREE);
+    /**
+     * BufferGeometry、BoxGeometry、BoxBufferGeometry
+     * BoxBufferGeometry 已弃用
+     */
     onMounted(() => {
       const box = document.getElementById('c')
       if (!box) return
