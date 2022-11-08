@@ -1,0 +1,119 @@
+<template>
+  <div class="three-demo">
+    <canvas id="content"></canvas>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import {onMounted} from "vue";
+import * as THREE from 'three'// 导入轨道控制器
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import {WebGLRenderer} from "three";
+
+const resizeRendererToDisplaySize = (renderer: WebGLRenderer) => {
+  const canvas = renderer.domElement;
+  const pixelRatio = window.devicePixelRatio;
+  const width = canvas.clientWidth * pixelRatio | 0;
+  const height = canvas.clientHeight * pixelRatio | 0;
+  const needResize = canvas.width !== width || canvas.height !== height;
+  if (needResize) {
+    renderer.setSize(width, height, false);
+  }
+  return needResize;
+}
+
+const createPlaneInstance = (color: string = '#FFB6C1', x: number = 2) => {
+  const geometry = new THREE.PlaneGeometry()
+  const material = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide })
+  const plane = new THREE.Mesh(geometry, material)
+  plane.position.set(0, x, 0)
+  plane.rotation.set(-70, 0, 0)
+  plane.scale.x = 2
+  return plane
+}
+
+const init = () => {
+  // 获取容器
+  const content = document.getElementById('content')
+  if (!content) return
+  console.log(content.clientWidth);
+  console.log(content.clientHeight);
+
+  // 创建场景
+  const scene = new THREE.Scene()
+
+  // 创建相机
+  const camera = new THREE.PerspectiveCamera(75, content.clientWidth / content.clientHeight, 0.1, 1000)
+  // 初始都在 0,0,0 为了可以看到物体，所以将相机往远拿
+  camera.position.set(4, 6, 8)
+  camera.rotation.set(-36.8, 21.7, 15.6)
+
+  // 创建渲染器
+  const renderer = new THREE.WebGLRenderer({ canvas: content, antialias: true })
+  renderer.setSize(content.clientWidth, content.clientHeight, false)
+
+  // 添加坐标轴辅助器: 红色代表 X 轴. 绿色代表 Y 轴. 蓝色代表 Z 轴.
+  const axesHelper = new THREE.AxesHelper(10)
+  scene.add(axesHelper)
+
+  /**
+   * 创建轨道控制器
+   * 参数解释: 使相机围绕着目标进行轨道运动。相当于眼睛在动，物体不动
+   * 创建之后就可以控制了，但是要重新渲染才可以看到效果
+   */
+  const controls = new OrbitControls(camera, renderer.domElement)
+  // 设置控制器阻尼，更具有真实效果，设置了这个之后必须在循环渲染函数中调用 control.update()
+  controls.enableDamping = true
+
+  const arr = [
+    {
+      color: '#bf242a',
+      x: 2
+    },
+    {
+      color: '#ff461f',
+      x: 1.5
+    },
+    {
+      color: '#845a33',
+      x: 1
+    },
+    {
+      color: '#1685a9',
+      x: 0.5
+    },
+    {
+      color: '#003472',
+      x: 0
+    }
+  ]
+  arr.forEach(i => {
+    const plane = createPlaneInstance(i.color, i.x)
+    scene.add(plane)
+  })
+
+  const render = () => {
+    controls.update()
+    renderer.render(scene, camera)
+    if (resizeRendererToDisplaySize(renderer)) {
+      const canvas = renderer.domElement;
+      camera.aspect = canvas.clientWidth / canvas.clientHeight;
+      camera.updateProjectionMatrix();
+    }
+    requestAnimationFrame(render)
+  }
+  render()
+}
+
+onMounted(() => {
+  init()
+})
+</script>
+
+<style scoped>
+.three-demo, #content {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+</style>

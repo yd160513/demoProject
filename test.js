@@ -1,3 +1,5 @@
+import * as THREE from "three";
+
 const arr = [
     {
         "business_id": "1506",
@@ -956,3 +958,37 @@ const res = arr.reduce((prev, curr) => {
     return prev
 }, [])
 console.log(res);
+
+
+
+
+
+
+//const planeGeometry = new THREE.PlaneGeometry(1, 1)
+//const material = new THREE.MeshBasicMaterial( { color: 0xffff00 })
+//const cube = new THREE.Mesh(planeGeometry, material)
+//cube.position.set(0, 1, 0)
+//cube.rotation.set(-70, 0, 0)
+//cube.scale.set(2, 1, 1)
+const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
+// 添加材质
+const material = new THREE.MeshBasicMaterial({ color: 0xffff00 })
+// 将立方体和材质融合到一起
+const cube = new THREE.Mesh(boxGeometry, material)
+scene.add(cube)
+
+//const planeGeometry1 = new THREE.PlaneGeometry(1, 1)
+//const material1 = new THREE.MeshStandardMaterial( { color: '#00ffff' })
+//const cube1 = new THREE.Mesh(planeGeometry1, material1)
+//cube1.position.set(0, 0.5, 0)
+//cube1.rotation.set(-70, 0, 0)
+//cube1.scale.set(2, 1, 1)
+//scene.add(cube1)
+//
+//const planeGeometry2 = new THREE.PlaneGeometry(1, 1)
+//const material2 = new THREE.MeshStandardMaterial( { color: '#00ffff' })
+//const cube2 = new THREE.Mesh(planeGeometry2, material2)
+//cube2.position.set(0, 0, 0)
+//cube2.rotation.set(-70, 0, 0)
+//cube2.scale.set(2, 1, 1)
+//scene.add(cube2)

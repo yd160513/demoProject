@@ -2,17 +2,29 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 
 const routes = [
   { path: '/', component: () => import('../components/HelloWorld.vue') },
+  //{
+  //  path: "/three",
+  //  name: "Three",
+  //  component: () =>
+  //    import("../components/Three.vue")
+  //},
+  //{
+  //  path: "/demo",
+  //  name: "Demo",
+  //  component: () =>
+  //    import("../components/ThreeDemo.vue")
+  //},
   {
     path: "/three",
     name: "Three",
     component: () =>
-      import("../components/Three.vue")
+      import("../views/three/demo.vue")
   },
   {
-    path: "/demo",
-    name: "Demo",
+    path: "/threeDemo",
+    name: "ThreeDemo",
     component: () =>
-      import("../components/ThreeDemo.vue")
+      import("../views/three/index.vue")
   },
   {
     path: "/threeDemo",
