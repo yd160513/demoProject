@@ -5,10 +5,13 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted} from "vue";
+import {onMounted, Ref, ref} from "vue";
 import * as THREE from 'three'// 导入轨道控制器
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import {WebGLRenderer} from "three";
+import {Mesh, MeshBasicMaterial, PlaneGeometry, Vector3, WebGLRenderer} from "three";
+
+// 所有的图元
+const primitives: Ref<Mesh<PlaneGeometry, MeshBasicMaterial>[]> = ref([])
 
 const resizeRendererToDisplaySize = (renderer: WebGLRenderer) => {
   const canvas = renderer.domElement;
@@ -20,6 +23,36 @@ const resizeRendererToDisplaySize = (renderer: WebGLRenderer) => {
     renderer.setSize(width, height, false);
   }
   return needResize;
+}
+
+const createLineInstance = () => {
+  const lineMaterial = new THREE.LineBasicMaterial( {
+    color: 0xffffff,
+    linewidth: 1,
+    linecap: 'round', //ignored by WebGLRenderer
+    linejoin:  'round' //ignored by WebGLRenderer
+  } );
+
+  // 根据图元数量确定线的数量
+  const linePoints = primitives.value.map((item, i) => {
+    const points: Vector3[] = [];
+    const next = primitives.value[i + 1]
+    if (next) {
+      points.push( new THREE.Vector3( item.position.x, item.position.y, item.position.z ) );
+      points.push( new THREE.Vector3( next.position.x, next.position.y, next.position.z ) );
+    }
+
+    return points
+  })
+
+  const lines = linePoints.map(points => {
+    console.log(points)
+    const geometry = new THREE.BufferGeometry().setFromPoints( points );
+    const line = new THREE.Line( geometry, lineMaterial );
+    return line
+  })
+
+  return lines
 }
 
 const createPlaneInstance = (color: string = '#FFB6C1', x: number = 2) => {
@@ -36,8 +69,6 @@ const init = () => {
   // 获取容器
   const content = document.getElementById('content')
   if (!content) return
-  console.log(content.clientWidth);
-  console.log(content.clientHeight);
 
   // 创建场景
   const scene = new THREE.Scene()
@@ -65,6 +96,7 @@ const init = () => {
   // 设置控制器阻尼，更具有真实效果，设置了这个之后必须在循环渲染函数中调用 control.update()
   controls.enableDamping = true
 
+  // 创建平面
   const arr = [
     {
       color: '#bf242a',
@@ -89,8 +121,16 @@ const init = () => {
   ]
   arr.forEach(i => {
     const plane = createPlaneInstance(i.color, i.x)
+    primitives.value.push(plane)
     scene.add(plane)
   })
+
+  // 生成线
+  const lines = createLineInstance()
+  lines.forEach(line => {
+    scene.add(line)
+  })
+
 
   const render = () => {
     controls.update()
@@ -111,7 +151,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.three-demo, #content {
+#content {
   display: block;
   width: 100%;
   height: 100%;
