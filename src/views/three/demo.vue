@@ -134,12 +134,13 @@ const init = () => {
 
   const render = () => {
     controls.update()
-    renderer.render(scene, camera)
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
       camera.updateProjectionMatrix();
     }
+    // 这个放在 resizeRendererToDisplaySize 前边会有比较明显的闪烁
+    renderer.render(scene, camera)
     requestAnimationFrame(render)
   }
   render()
@@ -151,6 +152,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.three-demo {
+  width: 100%;
+  height: 100%;
+}
 #content {
   display: block;
   width: 100%;
