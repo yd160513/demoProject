@@ -25,6 +25,7 @@ const resizeRendererToDisplaySize = (renderer: WebGLRenderer) => {
   return needResize;
 }
 
+// 生成平面间的线
 const createLineInstance = () => {
   const lineMaterial = new THREE.LineBasicMaterial( {
     color: 0xffffff,
@@ -55,13 +56,25 @@ const createLineInstance = () => {
   return lines
 }
 
+// 生成平面
 const createPlaneInstance = (color: string = '#FFB6C1', x: number = 2) => {
-  const geometry = new THREE.PlaneGeometry()
-  const material = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide })
+  const geometry = new THREE.PlaneGeometry(5, 3)
+  /**
+   * Z-Fighting: 两个平面重叠之后闪烁的官方术语，类似于 z-index
+   * 解决办法: polygonOffset: true, polygonOffsetUnits: 1, polygonOffsetFactor: 1
+   */
+  const material = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetUnits: 1, polygonOffsetFactor: 1 })
   const plane = new THREE.Mesh(geometry, material)
   plane.position.set(0, x, 0)
   plane.rotation.set(-70, 0, 0)
-  plane.scale.x = 2
+
+  // 创建 geometry 的描边
+  const edges = new THREE.EdgesGeometry(geometry);
+  const edgesMaterial = new THREE.LineBasicMaterial({
+    color: '#c2f1fb'
+  })
+  const line = new THREE.LineSegments(edges,edgesMaterial);
+  plane.add(line)
   return plane
 }
 
@@ -99,7 +112,7 @@ const init = () => {
   // 创建平面
   const arr = [
     {
-      color: '#bf242a',
+      color: '#ffffff',
       x: 2
     },
     {
@@ -130,6 +143,28 @@ const init = () => {
   lines.forEach(line => {
     scene.add(line)
   })
+
+  const childGeometry = new THREE.PlaneGeometry(1, 1)
+  const childMaterial = new THREE.MeshBasicMaterial({ color: '#0f3a9c', side: THREE.DoubleSide })
+  const plane = new THREE.Mesh(childGeometry, childMaterial)
+  plane.position.x = -1
+  plane.position.y = 0.8
+  const childGeometry2 = new THREE.PlaneGeometry(1, 1)
+  const childMaterial2 = new THREE.MeshBasicMaterial({ color: '#2ccc5a', side: THREE.DoubleSide })
+  const plane2 = new THREE.Mesh(childGeometry2, childMaterial2)
+  plane2.position.x = 1
+  plane2.position.y = 0.8
+  const childGeometry3 = new THREE.PlaneGeometry(1, 1)
+  const childMaterial3 = new THREE.MeshBasicMaterial({ color: '#471806', side: THREE.DoubleSide })
+  const plane3 = new THREE.Mesh(childGeometry3, childMaterial3)
+  plane3.position.x = 1
+  plane3.position.y = -0.8
+  const childGeometry4 = new THREE.PlaneGeometry(1, 1)
+  const childMaterial4 = new THREE.MeshBasicMaterial({ color: '#6b15cb', side: THREE.DoubleSide })
+  const plane4 = new THREE.Mesh(childGeometry4, childMaterial4)
+  plane4.position.x = -1
+  plane4.position.y = -0.8
+  primitives.value[0].add(plane, plane2, plane3, plane4)
 
 
   const render = () => {
