@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+      /*非深色模式*/
+      :root {
+          --BACKGROUND_COLOR: #FFF;
+          --TEXT_COLOR: blue;
+      }
+
+      /*深色模式*/
+      @media (prefers-color-scheme: dark) {
+          :root {
+              --BACKGROUND_COLOR: #000;
+              --TEXT_COLOR: red;
+          }
+      }
+
+      body {
+          background-color: var(--BACKGROUND_COLOR);
+          color: var(--TEXT_COLOR);
+      }
+  </style>
+</head>
+<body>
+<div>测试内容测试内容测试内容测试内容测试内容测试内容</div>
+</body>
+<script>
+  const darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)'); // 匹配深色模式
+  console.log(darkMode)
+  // 判断是否匹配深色模式， matches为true代表当前系统是深色模式
+  if (darkMode && darkMode.matches) {
+    document.body.classList.add('dark');
+  }
+  // 监听主题切换事件
+  darkMode && darkMode.addEventListener('change', e => {
+    if (e.matches) {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+  });
+</script>
+</html>

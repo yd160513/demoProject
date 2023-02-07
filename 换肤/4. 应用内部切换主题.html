@@ -1,0 +1,143 @@
+<!--
+  业务逻辑:
+  1. 进入网站后，用户之前没有手动点击切换主题按钮，则使用媒体查询检测用户是否开启暗黑主题，同步系统配色。
+  2. 媒体查询兼容性有兼容性问题，如果媒体查询失败则判断用户当前系统时间，根据时间显示高亮或暗黑主题。（这里也可以改成: 跟随系统）
+  3. 进入网站后，用户之前选择过主题，则查询 cookie 或者 localStorage 中存储的结果来展示对应主题，优先级高于 1、2 中提到的。
+
+  实现注意点:
+  1. 暗黑模式依靠 html/body 标签内是否有 class="dark" 来实现
+  2. 在 html/body 标签内叠加样式来实现主题切换
+  3. 为了让暗色模式下，图片不要过度亮而刺眼，可以给图片添加 filter 样式: filter: brightness(0.9);
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+      .dark {
+
+          color: #E0E0E0;
+
+          background-color: #424242;
+
+      }
+
+      .dark span {
+
+          color: red;
+
+      }
+
+      .dark .btn {
+
+          color: #fff;
+
+          background-color: #e45353a1;
+
+          border-color: #e45353a1;
+
+      }
+  </style>
+</head>
+<body>
+<div>
+  <button id="changeBtn" class="btn"> 切换主题</button>
+  <div>这里是 div</div>
+  <span>这里是 span</span>
+</div>
+</body>
+
+<script>
+  // 进入页面检查主题并设置
+  const checkDarkMode = () => {
+    // 获取本地存储中的主题
+    const mode = document.cookie.split(';')[0].split('=')[1]
+    console.log(mode);
+
+    // 本地有主题
+    if (mode) {
+      if (mode === 'dark') {
+        // 给 body 添加 dark 样式类。 TODO: 这里给 body 加样式是不是不如给 html 标签加更好，给 body 加在拖动窗口大小变化的时候会不会闪过白色
+        document.body.classList.add('dark');
+      } else {
+        document.body.classList.remove('dark');
+      }
+    }
+    /**
+     * 本地没有主题:
+     * 1. 判断系统是否启用暗黑主题
+     * 2. 判断系统是否启用高亮主题
+     * 3. 根据当前时间决定对应主题
+     */
+    else {
+      // 1. 判断系统是否启用暗黑主题，添加 dark 样式类
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark')
+      }
+      // 2. 判断系统是否启用高亮主题，移除 dark 样式类
+      else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+        document.body.classList.remove('dark')
+      }
+      // 3. 根据当前时间决定对应主题
+      else if (new Date().getHours() >= 21 || new Date().getHours() < 7) {
+        document.body.classList.add('dark')
+      }
+    }
+  }
+
+  checkDarkMode()
+
+  // 切换主题
+  const changeMode = () => {
+    // 获取本地存储中的主题
+    const mode = document.cookie.split(';')[0].split('=')[1]
+    console.log(mode);
+
+    // 存储中有主题
+    if (mode) {
+      if (mode === 'dark') {
+        document.cookie = 'scheme=light'
+        document.body.classList.add('light')
+        document.body.classList.remove('dark')
+      } else if (mode === 'light') {
+        document.cookie = 'scheme=dark'
+        document.body.classList.add('dark')
+        document.body.classList.remove('light')
+      }
+    }
+    // 存储中没有主题，默认为高亮，现在要切换为暗黑
+    else {
+      document.cookie = 'scheme=dark'
+      document.body.classList.add('dark')
+      document.body.classList.remove('light')
+    }
+
+  }
+
+  // 手动切换主题
+  const changeBtn = document.getElementById('changeBtn')
+  changeBtn.addEventListener('click', changeMode)
+
+  // 监听系统的主题
+  const darkMedia = window.matchMedia('(prefers-color-scheme: dark)')
+  const lightMedia = window.matchMedia('(prefers-color-scheme: light)')
+
+  const listenerCallback = (e) => {
+    const prefersDarkMode = e.matches
+    if (prefersDarkMode) {
+      // 这里直接调用 checkDarkMode 是因为逻辑是一样的，如果应用内有固定的主题，则优先使用应用内的主题
+      checkDarkMode()
+    }
+  }
+
+  if (typeof darkMedia && typeof lightMedia) {
+    darkMedia.addEventListener('change', listenerCallback)
+    lightMedia.addEventListener('change', listenerCallback)
+  }
+</script>
+
+</html>

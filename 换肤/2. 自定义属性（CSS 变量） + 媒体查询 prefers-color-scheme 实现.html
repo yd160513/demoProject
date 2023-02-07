@@ -1,0 +1,33 @@
+<!--
+  弊端: 无法单独更改应用内，只能跟随系统
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+      :root {
+          --BACKGROUND_COLOR: #FFF; /*非深色模式是白色背景*/
+          --TEXT_COLOR: #000; /*非深色模式是黑色的字*/
+      }
+
+      @media (prefers-color-scheme: dark) {
+          :root {
+              --BACKGROUND_COLOR: #000; /*深色模式是黑色背景*/
+              --TEXT_COLOR: #FFF; /*深色模式是白色的字*/
+          }
+      }
+      body {
+          background-color: var(--BACKGROUND_COLOR);
+          color: var(--TEXT_COLOR);
+      }
+  </style>
+</head>
+<body>
+<p>testtesttesttesttesttesttest</p>
+</body>
+</html>

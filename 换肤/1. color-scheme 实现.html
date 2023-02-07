@@ -1,0 +1,41 @@
+<!--
+  弊端: 无法单独更改应用内，只能跟随系统
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+      :root {
+          /* 跟随系统 */
+          color-scheme: light dark;
+          /* 设置固定主题 */
+          /*color-scheme: dark*/
+      }
+
+      /* 检测系统主题是暗黑模式: prefers-color-scheme: dark
+         只有在暗黑模式下生效
+      */
+      @media (prefers-color-scheme: dark) {
+          body {
+              color: red;
+          }
+      }
+  </style>
+</head>
+<body>
+<h1>color-scheme</h1>
+<h1>color-scheme</h1>
+<h1>color-scheme</h1>
+<h1>color-scheme</h1>
+<h1>color-scheme</h1>
+<h1>color-scheme</h1>
+<h1>color-scheme</h1>
+<h1>color-scheme</h1>
+<button>test</button>
+</body>
+</html>
