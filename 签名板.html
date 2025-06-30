@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>多格式签名板</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            color: #e0e0ff;
+        }
+        
+        .signature-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            width: 100%;
+            margin-bottom: 30px;
+            position: relative;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        #signatureCanvas {
+            display: block;
+            background-color: rgba(248, 249, 250, 0.95);
+            width: 100%;
+            height: 400px;
+            cursor: crosshair;
+            border-bottom: 1px solid rgba(224, 224, 224, 0.5);
+        }
+        
+        .canvas-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #aaa;
+            font-size: 1.4rem;
+            pointer-events: none;
+            text-align: center;
+            font-style: italic;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            width: 100%;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 160px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.4s;
+            z-index: -1;
+        }
+        
+        .btn:hover::before {
+            width: 100%;
+        }
+        
+        .btn i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .btn-clear {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            color: white;
+        }
+        
+        .btn-clear:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 75, 43, 0.4);
+        }
+        
+        .btn-save {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            color: white;
+        }
+        
+        .btn-save:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 176, 155, 0.4);
+        }
+        
+        .btn-color {
+            padding: 0;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: linear-gradient(145deg, #6a11cb, #2575fc);
+        }
+        
+        .color-picker {
+            width: 100%;
+            height: 100%;
+            border: none;
+            cursor: pointer;
+            background: transparent;
+        }
+        
+        .btn-width {
+            background: linear-gradient(to right, #8e2de2, #4a00e0);
+            color: white;
+            min-width: auto;
+            width: 60px;
+            height: 60px;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+        
+        .format-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+            width: 100%;
+        }
+        
+        .format-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            min-width: 140px;
+            text-align: center;
+        }
+        
+        .format-btn.active {
+            background: linear-gradient(to right, #ff8a00, #da1b60);
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(218, 27, 96, 0.4);
+        }
+        
+        .format-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        
+        .signature-preview {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+            margin-top: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .signature-preview h3 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .preview-content {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow: auto;
+        }
+        
+        #previewImage {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: white;
+            padding: 10px;
+        }
+        
+        #jsonPreview, #pointsPreview {
+            text-align: left;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow: auto;
+            font-family: monospace;
+            color: #f8f9fa;
+            white-space: pre-wrap;
+        }
+        
+        .svg-preview {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow: auto;
+        }
+        
+        .instructions {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            width: 100%;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .instructions h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            color: #ffd700;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .instructions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .instruction-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .instruction-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .instruction-card i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #4facfe;
+        }
+        
+        .instruction-card h4 {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+        
+        .instruction-card p {
+            color: #e0e0ff;
+            line-height: 1.6;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 1rem;
+            opacity: 0.8;
+            color: #a0a0ff;
+            padding: 20px;
+        }
+        
+        .format-info {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            color: #c0c0ff;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(37, 117, 252, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(37, 117, 252, 0.6);
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            #signatureCanvas {
+                height: 350px;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                min-width: 140px;
+                font-size: 1rem;
+            }
+            
+            .format-btn {
+                padding: 10px 20px;
+                min-width: 120px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            #signatureCanvas {
+                height: 300px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .format-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .format-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-signature"></i> 多格式签名板</h1>
+            <p class="subtitle">支持PNG图片、SVG矢量图、JSON数据和点坐标导出</p>
+        </header>
+        
+        <div class="signature-container">
+            <canvas id="signatureCanvas"></canvas>
+            <div class="canvas-placeholder">请在此处签名</div>
+        </div>
+        
+        <div class="format-selector">
+            <div class="format-btn active" data-format="png">
+                <i class="fas fa-image"></i> PNG图片
+            </div>
+            <div class="format-btn" data-format="svg">
+                <i class="fas fa-vector-square"></i> SVG矢量图
+            </div>
+            <div class="format-btn" data-format="json">
+                <i class="fas fa-code"></i> JSON数据
+            </div>
+            <div class="format-btn" data-format="points">
+                <i class="fas fa-map-marker-alt"></i> 点坐标
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-clear" id="clearBtn">
+                <i class="fas fa-eraser"></i> 清除签名
+            </button>
+            
+            <div class="btn btn-color">
+                <input type="color" class="color-picker" id="colorPicker" value="#000000">
+            </div>
+            
+            <button class="btn btn-width" id="widthBtn">
+                <span id="widthValue">3</span>
+            </button>
+            
+            <button class="btn btn-save" id="saveBtn">
+                <i class="fas fa-save"></i> 保存签名
+            </button>
+        </div>
+        
+        <div class="signature-preview" id="previewContainer">
+            <h3><i class="fas fa-download"></i> 签名预览</h3>
+            <div class="preview-content" id="previewContent">
+                <!-- 预览内容将动态生成 -->
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> 使用说明</h3>
+            <div class="instructions-grid">
+                <div class="instruction-card">
+                    <i class="fas fa-mouse-pointer"></i>
+                    <h4>桌面端使用</h4>
+                    <p>使用鼠标在画布上按住并拖动来签名，支持压感笔等输入设备</p>
+                </div>
+                
+                <div class="instruction-card">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h4>移动端使用</h4>
+                    <p>用手指在画布上书写签名，支持多点触控和手势操作</p>
+                </div>
+                
+                <div class="instruction-card">
+                    <i class="fas fa-paint-brush"></i>
+                    <h4>个性化设置</h4>
+                    <p>可调整签名颜色和线条粗细，满足不同场景需求</p>
+                </div>
+                
+                <div class="instruction-card">
+                    <i class="fas fa-file-export"></i>
+                    <h4>多格式导出</h4>
+                    <p>支持PNG图片、SVG矢量图、JSON数据和点坐标四种格式导出</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>多格式签名解决方案 &copy; 2023 | 支持PNG、SVG、JSON和点坐标导出</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('signatureCanvas');
+            const ctx = canvas.getContext('2d');
+            const clearBtn = document.getElementById('clearBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const colorPicker = document.getElementById('colorPicker');
+            const widthBtn = document.getElementById('widthBtn');
+            const widthValue = document.getElementById('widthValue');
+            const previewContainer = document.getElementById('previewContainer');
+            const previewContent = document.getElementById('previewContent');
+            const formatBtns = document.querySelectorAll('.format-btn');
+            
+            // 存储绘制路径
+            let drawingData = [];
+            let currentPath = null;
+            let selectedFormat = 'png';
+            
+            // 设置画布尺寸
+            function resizeCanvas() {
+                const container = canvas.parentElement;
+                canvas.width = container.clientWidth;
+                canvas.height = 400;
+                clearCanvas();
+            }
+            
+            // 清除画布
+            function clearCanvas() {
+                ctx.fillStyle = '#f8f9fa';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                drawingData = [];
+            }
+            
+            // 初始化变量
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            let lineWidth = 3;
+            let strokeStyle = '#000000';
+            
+            // 设置初始状态
+            resizeCanvas();
+            
+            // 事件监听 - 开始绘制
+            function startDrawing(e) {
+                isDrawing = true;
+                [lastX, lastY] = getCoordinates(e);
+                
+                // 开始新路径
+                currentPath = {
+                    points: [],
+                    color: strokeStyle,
+                    width: lineWidth
+                };
+            }
+            
+            // 事件监听 - 绘制中
+            function draw(e) {
+                if (!isDrawing) return;
+                
+                const [x, y] = getCoordinates(e);
+                
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.strokeStyle = strokeStyle;
+                ctx.lineWidth = lineWidth;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.stroke();
+                
+                // 记录点
+                if (currentPath) {
+                    currentPath.points.push({x, y});
+                }
+                
+                [lastX, lastY] = [x, y];
+            }
+            
+            // 事件监听 - 结束绘制
+            function stopDrawing() {
+                if (!isDrawing) return;
+                
+                isDrawing = false;
+                
+                // 保存当前路径
+                if (currentPath && currentPath.points.length > 0) {
+                    drawingData.push(currentPath);
+                }
+                currentPath = null;
+            }
+            
+            // 获取坐标（兼容鼠标和触摸事件）
+            function getCoordinates(e) {
+                let x, y;
+                
+                if (e.type.includes('touch')) {
+                    const touch = e.touches[0] || e.changedTouches[0];
+                    const rect = canvas.getBoundingClientRect();
+                    x = touch.clientX - rect.left;
+                    y = touch.clientY - rect.top;
+                } else {
+                    const rect = canvas.getBoundingClientRect();
+                    x = e.clientX - rect.left;
+                    y = e.clientY - rect.top;
+                }
+                
+                return [x, y];
+            }
+            
+            // 事件监听器设置
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            canvas.addEventListener('touchstart', startDrawing);
+            canvas.addEventListener('touchmove', draw);
+            canvas.addEventListener('touchend', stopDrawing);
+            
+            // 清除按钮
+            clearBtn.addEventListener('click', clearCanvas);
+            
+            // 保存按钮
+            saveBtn.addEventListener('click', function() {
+                if (drawingData.length === 0) {
+                    alert('请先签名！');
+                    return;
+                }
+                
+                switch(selectedFormat) {
+                    case 'png':
+                        exportAsPNG();
+                        break;
+                    case 'svg':
+                        exportAsSVG();
+                        break;
+                    case 'json':
+                        exportAsJSON();
+                        break;
+                    case 'points':
+                        exportAsPoints();
+                        break;
+                }
+                
+                previewContainer.style.display = 'block';
+            });
+            
+            // 导出为PNG
+            function exportAsPNG() {
+                const dataURL = canvas.toDataURL('image/png');
+                
+                previewContent.innerHTML = `
+                    <img id="previewImage" src="${dataURL}" alt="签名预览">
+                    <div class="format-info">
+                        <p>PNG格式：位图格式，适用于打印和网页显示</p>
+                        <a href="${dataURL}" download="signature.png" class="download-btn">
+                            <i class="fas fa-download"></i> 下载PNG图片
+                        </a>
+                    </div>
+                `;
+            }
+            
+            // 导出为SVG
+            function exportAsSVG() {
+                let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width}" height="${canvas.height}" viewBox="0 0 ${canvas.width} ${canvas.height}">`;
+                svgContent += `<rect width="100%" height="100%" fill="#f8f9fa"/>`;
+                
+                drawingData.forEach(path => {
+                    if (path.points.length === 0) return;
+                    
+                    let pathData = `M ${path.points[0].x} ${path.points[0].y} `;
+                    for (let i = 1; i < path.points.length; i++) {
+                        pathData += `L ${path.points[i].x} ${path.points[i].y} `;
+                    }
+                    
+                    svgContent += `<path d="${pathData}" fill="none" stroke="${path.color}" stroke-width="${path.width}" stroke-linecap="round" stroke-linejoin="round"/>`;
+                });
+                
+                svgContent += '</svg>';
+                
+                const svgBlob = new Blob([svgContent], {type: 'image/svg+xml;charset=utf-8'});
+                const svgUrl = URL.createObjectURL(svgBlob);
+                
+                previewContent.innerHTML = `
+                    <div class="svg-preview">
+                        ${svgContent}
+                    </div>
+                    <div class="format-info">
+                        <p>SVG格式：矢量格式，可无限缩放而不失真</p>
+                        <a href="${svgUrl}" download="signature.svg" class="download-btn">
+                            <i class="fas fa-download"></i> 下载SVG文件
+                        </a>
+                    </div>
+                `;
+            }
+            
+            // 导出为JSON
+            function exportAsJSON() {
+                const jsonData = {
+                    metadata: {
+                        created: new Date().toISOString(),
+                        width: canvas.width,
+                        height: canvas.height
+                    },
+                    paths: drawingData
+                };
+                
+                const jsonStr = JSON.stringify(jsonData, null, 2);
+                
+                previewContent.innerHTML = `
+                    <h4>JSON数据结构</h4>
+                    <pre id="jsonPreview">${jsonStr}</pre>
+                    <div class="format-info">
+                        <p>JSON格式：结构化数据，便于程序处理和存储</p>
+                        <a href="data:application/json;charset=utf-8,${encodeURIComponent(jsonStr)}" download="signature.json" class="download-btn">
+                            <i class="fas fa-download"></i> 下载JSON文件
+                        </a>
+                    </div>
+                `;
+            }
+            
+            // 导出为点坐标
+            function exportAsPoints() {
+                let pointsData = [];
+                let pointCount = 0;
+                
+                drawingData.forEach(path => {
+                    path.points.forEach(point => {
+                        pointsData.push({
+                            x: point.x,
+                            y: point.y,
+                            color: path.color,
+                            width: path.width
+                        });
+                        pointCount++;
+                    });
+                });
+                
+                let pointsContent = `总点数: ${pointCount}\n\n`;
+                pointsContent += pointsData.map((point, index) => 
+                    `点 ${index + 1}: x=${Math.round(point.x)}, y=${Math.round(point.y)}, 颜色=${point.color}, 线宽=${point.width}`
+                ).join('\n');
+                
+                previewContent.innerHTML = `
+                    <h4>点坐标数据 (${pointCount}个点)</h4>
+                    <pre id="pointsPreview">${pointsContent}</pre>
+                    <div class="format-info">
+                        <p>点坐标格式：包含每个点的坐标、颜色和线宽信息</p>
+                        <a href="data:text/plain;charset=utf-8,${encodeURIComponent(pointsContent)}" download="signature_points.txt" class="download-btn">
+                            <i class="fas fa-download"></i> 下载点坐标文件
+                        </a>
+                    </div>
+                `;
+            }
+            
+            // 颜色选择
+            colorPicker.addEventListener('input', function() {
+                strokeStyle = this.value;
+            });
+            
+            // 线宽调整
+            widthBtn.addEventListener('click', function() {
+                lineWidth = lineWidth < 10 ? lineWidth + 1 : 1;
+                widthValue.textContent = lineWidth;
+            });
+            
+            // 格式选择
+            formatBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    formatBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedFormat = this.dataset.format;
+                });
+            });
+            
+            // 窗口大小变化时调整画布
+            window.addEventListener('resize', resizeCanvas);
+            
+            // 初始化时显示示例
+            setTimeout(() => {
+                ctx.font = "italic 24px Arial";
+                ctx.fillStyle = "#aaa";
+                ctx.textAlign = "center";
+                ctx.fillText("请在此处签名", canvas.width/2, canvas.height/2);
+            }, 500);
+        });
+    </script>
+</body>
+</html>
